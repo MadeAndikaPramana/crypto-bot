@@ -76,6 +76,23 @@ def calc_volume_ma(df: pd.DataFrame, period: int = 20) -> pd.Series:
     """Calculate Volume Moving Average"""
     return df['volume'].rolling(window=period).mean()
 
+def calc_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
+    """Calculate Average Directional Index (ADX) untuk filter kekuatan tren"""
+    plus_dm = df['high'].diff()
+    minus_dm = df['low'].diff()
+    plus_dm[plus_dm < 0] = 0
+    minus_dm[minus_dm > 0] = 0
+    
+    tr = pd.concat([df['high'] - df['low'], 
+                    abs(df['high'] - df['close'].shift(1)), 
+                    abs(df['low'] - df['close'].shift(1))], axis=1).max(axis=1)
+    
+    atr = tr.rolling(window=period).mean()
+    plus_di = 100 * (plus_dm.rolling(window=period).mean() / atr)
+    minus_di = 100 * (abs(minus_dm).rolling(window=period).mean() / atr)
+    dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di)
+    return dx.rolling(window=period).mean()
+
 def merge_funding_rate(ohlcv_df: pd.DataFrame, funding_df: pd.DataFrame) -> pd.DataFrame:
     """
     Merge funding rate data with OHLCV data
@@ -134,6 +151,8 @@ def add_all_indicators(df: pd.DataFrame, config) -> pd.DataFrame:
     df['bb_middle'] = middle
     df['bb_lower'] = lower
     df['bb_width'] = width
+
+    df['adx_14'] = calc_adx(df, 14)
     
     return df
 

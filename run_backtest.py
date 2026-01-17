@@ -4,6 +4,7 @@
 import sys
 from pathlib import Path
 import json
+import numpy as np
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent))
@@ -17,6 +18,20 @@ from strategies.btc_mean_reversion import BTCMeanReversionStrategy
 from backtest_engine import BacktestEngine
 from performance import PerformanceAnalyzer
 from visualize import BacktestVisualizer
+
+def convert_numpy_types(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_numpy_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(i) for i in obj]
+    return obj
+
 
 def run_single_backtest(symbol: str, timeframe: str, strategy_class, 
                        strategy_name: str, download_new_data: bool = False):
@@ -177,11 +192,12 @@ def run_multi_strategy_backtest(download_new_data: bool = False):
     for name, data in all_results.items():
         serializable_results[name] = {
             'metrics': data['metrics'],
-            'equity_curve': [[timestamp.isoformat(), value] for timestamp, value in data['equity_curve'].items()]
+            'equity_curve': [[row['timestamp'].isoformat(), row['equity']] for index, row in data['equity_curve'].iterrows()]
         }
 
     # Save detailed metrics to JSON
     json_path = Path('results') / 'all_metrics.json'
+    serializable_results = convert_numpy_types(serializable_results)
     with open(json_path, 'w') as f:
         json.dump(serializable_results, f, indent=4)
     print(f"Detailed metrics saved to {json_path}")

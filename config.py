@@ -43,6 +43,7 @@ class BacktestConfig:
     SOL_ATR_SL_MULTIPLIER: float = 2.0
     SOL_ATR_TP1_MULTIPLIER: float = 2.0  # First target (50% position)
     SOL_ATR_TP2_MULTIPLIER: float = 4.0  # Second target (50% position)
+    SOL_ADX_THRESHOLD: float = 20.0
     
     # Mean Reversion Strategy Parameters (H1 BTC)
     MR_SYMBOL: str = "BTC/USDT"
@@ -50,8 +51,8 @@ class BacktestConfig:
     MR_BB_PERIOD: int = 20
     MR_BB_STD: float = 2.0
     MR_RSI_PERIOD: int = 14
-    MR_RSI_OVERSOLD: float = 30   # Long entry threshold
-    MR_RSI_OVERBOUGHT: float = 70  # Short entry threshold
+    MR_RSI_OVERSOLD: float = 45.0   # Long entry threshold
+    MR_RSI_OVERBOUGHT: float = 55.0  # Short entry threshold
     MR_RSI_EXTREME_LOW: float = 25   # Don't catch falling knife
     MR_RSI_EXTREME_HIGH: float = 75  # Don't short parabolic moves
     MR_EMA_PERIOD: int = 200  # Trend filter

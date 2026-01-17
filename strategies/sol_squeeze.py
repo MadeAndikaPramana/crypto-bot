@@ -101,6 +101,11 @@ class SOLSqueezeStrategy:
         current_volume = df.loc[idx, 'volume']
         avg_volume = df.loc[idx, 'volume_ma_20']
         timestamp = df.loc[idx, 'timestamp']
+        current_adx = df.loc[idx, 'adx_14']
+
+        # Saring: Hanya masuk jika tren cukup kuat (ADX > 20)
+        if current_adx < 20:
+            return None
         
         # Skip if key values are NaN
         if any(pd.isna(x) for x in [current_atr, current_rsi, current_width, avg_volume]):
@@ -130,7 +135,10 @@ class SOLSqueezeStrategy:
         
         # === LONG SETUP ===
         # Breakout above upper BB + RSI > 50 + high volume
-        if current_price > current_upper and current_rsi > 50:
+        prev_price = df.loc[idx-1, 'close']
+        prev_upper = df.loc[idx-1, 'bb_upper']
+
+        if current_price > current_upper and prev_price > prev_upper and current_rsi > 50:
             
             # Confirm it's a close above BB (not just a wick)
             # This is already true since we're using close price
